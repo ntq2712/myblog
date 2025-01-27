@@ -5,7 +5,7 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 COPY ["blog.csproj", "./"]
 RUN dotnet restore "blog.csproj"
-COPY ..
+COPY . .
 RUN dotnet publish -c Release -o /app/publish
 
 FROM base AS final
