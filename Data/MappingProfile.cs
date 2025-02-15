@@ -7,7 +7,7 @@ namespace blog.Data
     public class MappingProfile : Profile
     {
         public MappingProfile() {
-            CreateMap<User, CreateUser>();
+            CreateMap<User, CreateUser>().ReverseMap();
         }
     }
 }

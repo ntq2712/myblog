@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "ZDYgA58icO4=",
+  "dgSpecHash": "jxw4mVVj6y4=",
   "success": true,
   "projectFilePath": "/Users/quis/Desktop/resources/blog/blog.csproj",
   "expectedPackageFiles": [
@@ -8,6 +8,7 @@
     "/Users/quis/.nuget/packages/automapper.extensions.microsoft.dependencyinjection/12.0.1/automapper.extensions.microsoft.dependencyinjection.12.0.1.nupkg.sha512",
     "/Users/quis/.nuget/packages/azure.core/1.38.0/azure.core.1.38.0.nupkg.sha512",
     "/Users/quis/.nuget/packages/azure.identity/1.11.4/azure.identity.1.11.4.nupkg.sha512",
+    "/Users/quis/.nuget/packages/bcrypt.net-next/4.0.3/bcrypt.net-next.4.0.3.nupkg.sha512",
     "/Users/quis/.nuget/packages/bouncycastle.cryptography/2.3.1/bouncycastle.cryptography.2.3.1.nupkg.sha512",
     "/Users/quis/.nuget/packages/google.protobuf/3.26.1/google.protobuf.3.26.1.nupkg.sha512",
     "/Users/quis/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",

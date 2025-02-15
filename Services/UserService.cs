@@ -11,18 +11,20 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace blog.Services
 {
-    public class UserService(ApplicationDbContext contex, IConfiguration configuration) : IUser
+    public class UserService(ApplicationDbContext contex, IConfiguration configuration, IMapper mapper) : IUser
     {
-        public async Task<List<User>> GetAll(int pageSize = 20, int pageIndex = 1, string? searchText = null)
+        public async Task<List<UserDto>> GetAll(int pageSize = 20, int pageIndex = 1, string? searchText = null)
         {
 
-            if(pageSize <= 0 || pageIndex <= 0){
+            if (pageSize <= 0 || pageIndex <= 0)
+            {
                 throw new KeyNotFoundException("Page size and pageIndex must be greater than 0");
             }
 
             var users = contex.User.Where(u => u.IsDelete == false);
 
-            if(!string.IsNullOrEmpty(searchText)) {
+            if (!string.IsNullOrEmpty(searchText))
+            {
                 users = users.Where(e => e.FullName.Contains(searchText));
             }
 
@@ -31,12 +33,21 @@ namespace blog.Services
                 throw new KeyNotFoundException("Don't find user table");
             }
 
-            var result = await users.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
+            var result = await users.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(e => new UserDto{
+                UserId = e.UserId,
+                Role = e.Role,
+                FullName = e.FullName,
+                ProfilePic = e.ProfilePic,
+                Email = e.Email,
+                CreateAt = e.CreateAt,
+                ModifyAt = e.ModifyAt,
+                ModifyBy = e.ModifyBy
+            }).ToListAsync();
 
             return result;
         }
 
-       public async Task<List<User>> GetAllExsitDb(int pageSize, int pageIndex, string searchText, bool isDelete)
+        public async Task<List<User>> GetAllExsitDb(int pageSize, int pageIndex, string searchText, bool isDelete)
         {
             var users = await contex.User.Where(e => e.IsDelete == isDelete).Skip((pageIndex - 1) * pageSize).Take(pageIndex * pageSize).Where(e => string.IsNullOrEmpty(searchText) || e.FullName.Contains(searchText)).ToListAsync();
 
@@ -57,12 +68,17 @@ namespace blog.Services
 
         public async Task<User> Create(CreateUser _user)
         {
-            var user = new User();
+            var user = mapper.Map<User>(_user);
+            // var user = new User();
 
-            user.FullName = _user.FullName;
-            user.Email = _user.Email;
-            user.Password = _user.Password;
-            user.UserName =  _user.UserName;
+            // user.FullName = _user.FullName;
+            // user.Email = _user.Email;
+
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(_user.Password);
+
+            user.Password = hashedPassword;
+            // user.UserName = _user.UserName;
+            // user.Role = RoleType.USER;
 
             await contex.User.AddAsync(user);
             await contex.SaveChangesAsync();
@@ -118,25 +134,29 @@ namespace blog.Services
             return user;
         }
 
-         public async Task<string> Login(string _userName, string _password){
+        public async Task<string> Login(string _userName, string _password)
+        {
             var user = await contex.User.FirstOrDefaultAsync(e => e.UserName == _userName);
 
-            if(user == null){
+            if (user == null)
+            {
                 throw new KeyNotFoundException("Don't find user by UseName");
             }
 
-            if(user.Password == _password){
-                var token = GenToken(user);
-                
-                return token;
-            }else{
+            if (!BCrypt.Net.BCrypt.Verify(_password, user.Password))
+            {
                 throw new KeyNotFoundException("Password don't macth");
             }
-         }
 
-         private string GenToken(User user){
-             var claim = new List<Claim>{
-                new (JwtRegisteredClaimNames.Sub, user.FullName),
+            var token = GenToken(user);
+
+            return token;
+        }
+
+        private string GenToken(User user)
+        {
+            var claim = new List<Claim>{
+                new (JwtRegisteredClaimNames.Sub, user.Email),
                 new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new ("Id", user.UserId.ToString())
             };
@@ -146,19 +166,21 @@ namespace blog.Services
 
             var token = new JwtSecurityToken(
                 issuer: configuration["JwtSettings:Issuer"],
-                audience: configuration["Audience"],
+                audience: configuration["JwtSettings:Audience"],
                 claims: claim,
                 expires: DateTime.Now.AddHours(3),
                 signingCredentials: creds
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
-         }
+        }
 
-          public async Task<bool> isEmailExist(string email){
+        public async Task<bool> isEmailExist(string email)
+        {
             return await contex.User.AnyAsync(e => e.Email == email);
-          }
-        public async Task<bool> isAccountExist(string acount){
+        }
+        public async Task<bool> isAccountExist(string acount)
+        {
             return await contex.User.AnyAsync(e => e.UserName == acount);
         }
     }

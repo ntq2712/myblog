@@ -62,7 +62,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-
+builder.Services.AddAuthentication();
 
 var app = builder.Build();
 

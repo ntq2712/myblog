@@ -2,6 +2,7 @@ using blog.DTO.User;
 using blog.Helper;
 using blog.Model;
 using blog.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace blog.Controller
@@ -12,15 +13,25 @@ namespace blog.Controller
     {
         [HttpGet]
         [Route("[action]")]
-        public async Task<ActionResult<Response<List<User>>>> GetAllUser([FromQuery] int _pageSize = 20, int _pageIndex = 1, string? _searchText = null)
+        [Authorize]
+        public async Task<ActionResult<Response<List<UserDto>>>> GetAllUser([FromQuery] int _pageSize = 20, int _pageIndex = 1, string? _searchText = null)
         {
             try
             {
+                var userId = User.FindFirst("Id")?.Value;
+                Guid userGuidId = new Guid(userId ?? "");
+                
+                var user = await iUser.GetUserById(userGuidId);
+
+                if(user == null || user.Role != 0){
+                    return Unauthorized(new { message = "No access"});
+                }
+
                 var users = await iUser.GetAll(_pageSize, _pageIndex, _searchText);
 
                 var count = await iUser.Count();
 
-                var repon = new Response<List<User>>
+                var repon = new Response<List<UserDto>>
                 {
                     Data = users,
                     PageSize = _pageSize,
@@ -28,7 +39,7 @@ namespace blog.Controller
                     TotalRow = count,
                     SearchText = _searchText,
                     Message = "Success",
-                    Success = true
+                    Success = true,
                 };
 
                 return Ok(repon);
@@ -41,7 +52,7 @@ namespace blog.Controller
 
         [HttpPost]
         [Route("[action]")]
-        public async Task<ActionResult<ResponseBase<User>>> CreateUser([FromBody] CreateUser _user)
+        public async Task<ActionResult<ResponseBase<User>>> Register([FromBody] CreateUser _user)
         {
             try
             {
@@ -176,11 +187,11 @@ namespace blog.Controller
 
         [HttpPost]
         [Route("[action]")]
-        public async Task<ActionResult<ResponseBase<string>>> Login([FromBody] string _userName, string _password)
+        public async Task<ActionResult<ResponseBase<string>>> Login([FromBody] LoginDto user)
         {
             try
             {
-                var token = await iUser.Login(_userName, _password);
+                var token = await iUser.Login(user.userName, user.password);
 
                 if (token == null)
                 {

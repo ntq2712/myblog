@@ -5,7 +5,7 @@ namespace blog.Repository
 {
     public interface IUser
     {
-        public Task<List<User>> GetAll(int pageSize = 20, int pageIndex = 1, string? searchText = null);
+        public Task<List<UserDto>> GetAll(int pageSize = 20, int pageIndex = 1, string? searchText = null);
         public Task<List<User>> GetAllExsitDb(int pageSize, int pageIndex, string searchText, bool isDelete);
         public Task<int> Count();
         public Task<User> Create(CreateUser _user);
