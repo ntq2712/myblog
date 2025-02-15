@@ -28,7 +28,7 @@ jobs:
 
          git pull origin main
 
-         docker stop ç
+         docker stop web_api
          docker rm web_api
 
          docker rmi blog_api
