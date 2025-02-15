@@ -70,6 +70,18 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
+var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+if (!Directory.Exists(uploadFolder))
+{
+    Directory.CreateDirectory(uploadFolder);
+}
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploadFolder),
+    RequestPath = "/uploads"
+});
+
 
 app.UseAuthentication();
 app.UseAuthorization();

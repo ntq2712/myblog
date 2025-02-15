@@ -128,9 +128,7 @@ namespace blog.Services
 
             contex.User.Update(user);
             await contex.SaveChangesAsync();
-
-
-
+            
             return user;
         }
 
