@@ -24,7 +24,7 @@ namespace blog.Controller
         {
             if (file == null || file.Length == 0)
             {
-                return BadRequest(new { message = "File không hợp lệ." });
+                return BadRequest(new { message = "Invali file." });
             }
 
             if (file.Length > (5 * 1024 * 1024))
