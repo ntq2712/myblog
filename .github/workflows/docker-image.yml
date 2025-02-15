@@ -1,0 +1,42 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to vps
+      uses: appleboy/ssh-action@v0.1.10
+
+      with:
+       host: ${{ secrets.VPS_HOST }}
+       username: ${{ secrets.VPS_USER }}
+       password: ${{ secrets.VPS_PASSWORD }}
+       script: |
+         cd grow-family-blog-be
+
+         git pull origin main
+
+         docker stop ç
+         docker rm web_api
+
+         docker rmi blog_api
+         docker build -t blog_api .
+
+         docker run -d --name blog_api -p 5000:5000 -e ASPNETCORE_URLS="http://+:5000" blog_api
+
+         
+    
+    
+    
