@@ -36,7 +36,7 @@ namespace blog.Controller
             var fileExtension = Path.GetExtension(file.FileName).ToLower();
             if (Array.IndexOf(allowedExtensions, fileExtension) == -1)
             {
-                return BadRequest(new { message = "Chỉ chấp nhận hình ảnh." });
+                return BadRequest(new { message = "Just accept image." });
             }
 
             try
