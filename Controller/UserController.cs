@@ -305,7 +305,7 @@ namespace blog.Controller
                 return Ok(new ResponseBase<Guid>
                 {
                     Data = id,
-                    Message = "Cập nhật thành công !",
+                    Message = "Cập nhật mật khẩu thành công thành công !",
                     Status = 200,
                     Success = false
                 });
