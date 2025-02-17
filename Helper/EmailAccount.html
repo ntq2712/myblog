@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      .container {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        max-width: 500px;
+        margin: auto;
+      }
+      .header {
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        color: #000;
+      }
+      .content {
+        margin-top: 15px;
+        font-size: 14px;
+        color: #333;
+      }
+      .footer {
+        margin-top: 20px;
+        font-size: 12px;
+        text-align: center;
+        color: #888;
+      }
+      .highlight {
+        font-weight: bold;
+        color: #007bff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">Thông tin đăng nhập</div>
+      <div class="content">
+        <p>Chào <span class="highlight">{FullName}</span>,</p>
+        <p>Bạn đã được cấp tài khoản để đăng nhập vào hệ thống:</p>
+        <p>
+          <strong>Tài khoản:</strong> <span class="highlight">{Username}</span>
+        </p>
+        <p>
+          <strong>Mật khẩu:</strong> <span class="highlight">{Password}</span>
+        </p>
+        <p>
+          Vui lòng đăng nhập và đổi mật khẩu ngay sau khi nhận được email này.
+        </p>
+        <p>Trân trọng,</p>
+        <p>Đội ngũ hỗ trợ: contact.negublog@gmail.com</p>
+      </div>
+      <div class="footer">© 2024 NEGU Blog. All rights reserved.</div>
+    </div>
+  </body>
+</html>

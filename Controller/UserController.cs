@@ -20,11 +20,12 @@ namespace blog.Controller
             {
                 var userId = User.FindFirst("Id")?.Value;
                 Guid userGuidId = new Guid(userId ?? "");
-                
+
                 var user = await iUser.GetUserById(userGuidId);
 
-                if(user == null || user.Role != 0){
-                    return Unauthorized(new { message = "No access"});
+                if (user == null || user.Role != 0)
+                {
+                    return Unauthorized(new { message = "No access" });
                 }
 
                 var users = await iUser.GetAll(_pageSize, _pageIndex, _searchText);
@@ -52,20 +53,12 @@ namespace blog.Controller
 
         [HttpPost]
         [Route("[action]")]
+        [Authorize]
         public async Task<ActionResult<ResponseBase<User>>> Register([FromBody] CreateUser _user)
         {
             try
             {
                 var repon = new ResponseBase<User>();
-
-                var isAccountExist = await iUser.isAccountExist(_user.UserName);
-                if (isAccountExist)
-                {
-                    repon.Status = 204;
-                    repon.Message = "Account exist !";
-
-                    return Ok(repon);
-                }
 
                 var isEmailExist = await iUser.isEmailExist(_user.Email);
                 if (isEmailExist)
@@ -164,6 +157,7 @@ namespace blog.Controller
 
         [HttpGet]
         [Route("[action]")]
+        [Authorize]
         public async Task<ActionResult<ResponseBase<User>>> GetUserByUserName([FromQuery] string userName)
         {
             try
@@ -219,6 +213,86 @@ namespace blog.Controller
                     return repon;
                 }
 
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromQuery] string email)
+        {
+            try
+            {
+                if (email == null)
+                {
+                    var res = new ResponseBase<string>
+                    {
+                        Data = "",
+                        Message = "Email không hợp lệ.",
+                        Status = 400,
+                        Success = false
+                    };
+
+                    return Ok(res);
+                }
+
+                string token = await iUser.VerifyEmail(email);
+
+                if (token == null)
+                {
+                    return Ok(new ResponseBase<string>
+                    {
+                        Data = token,
+                        Message = "Đã có lỗi xãy ra.",
+                        Status = 400,
+                        Success = true
+                    });
+                }
+
+                return Ok(new ResponseBase<string>
+                {
+                    Data = token,
+                    Message = "",
+                    Status = 200,
+                    Success = true
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+
+        }
+
+        [HttpPut("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePassword resquet)
+        {
+            try
+            {
+                var user = await iUser.GetUserById(resquet.userId);
+
+                if (user == null)
+                {
+                    return Ok(new ResponseBase<string>
+                    {
+                        Data = null,
+                        Message = "Người dùng không tồn tại",
+                        Status = 204,
+                        Success = false
+                    });
+                }
+
+                Guid id = await iUser.ChangePassword(user, resquet.password);
+
+                return Ok(new ResponseBase<Guid>
+                {
+                    Data = id,
+                    Message = "Cập nhật thành công !",
+                    Status = 200,
+                    Success = false
+                });
             }
             catch (KeyNotFoundException ex)
             {

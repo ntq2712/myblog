@@ -13,6 +13,7 @@ namespace blog.Extenstion
         public static void AddDependencies(this IServiceCollection services)
         {
             services.AddScoped<IUser, UserService>();
+            services.AddScoped<IEmailService, EmailService>();
         }
 
         public static void AddMap(this IServiceCollection services)

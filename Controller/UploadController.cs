@@ -9,13 +9,17 @@ namespace blog.Controller
     public class UploadController : ControllerBase
     {
         private readonly string _uploadfileFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+        private readonly IWebHostEnvironment environment;
 
-        public UploadController()
+        public UploadController(IWebHostEnvironment _environment)
         {
             if (!Directory.Exists(_uploadfileFolder))
             {
                 Directory.CreateDirectory(_uploadfileFolder);
             }
+
+            environment = _environment;
+
         }
 
         [HttpPost("UploadImage")]
@@ -49,7 +53,13 @@ namespace blog.Controller
                     await file.CopyToAsync(stream);
                 }
 
-                string fileUrl = $"{Request.Scheme}://{Request.Host}/uploads/{fileName}";
+                string fileUrl = "";
+
+                if(environment.IsDevelopment()) {
+                    fileUrl = $"{Request.Scheme}://{Request.Host}/uploads/{fileName}";
+                }else{
+                    fileUrl = $"{Request.Scheme}://quinguyen.click/uploads/{fileName}";
+                }
 
                 var response = new ResponseBase<string>
                 {

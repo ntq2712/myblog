@@ -16,5 +16,7 @@ namespace blog.Repository
         public Task<string> Login(string acount, string password);
         public Task<bool> isEmailExist(string email);
         public Task<bool> isAccountExist(string acount);
+        public Task<string> VerifyEmail(string email);
+        public Task<Guid> ChangePassword(User user, string password);
     }
 }

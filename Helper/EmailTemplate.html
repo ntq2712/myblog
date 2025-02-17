@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      .container {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        max-width: 500px;
+        margin: auto;
+      }
+      .header {
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+      }
+      .content {
+        margin-top: 15px;
+        font-size: 14px;
+        color: #555;
+      }
+      .footer {
+        margin-top: 20px;
+        font-size: 12px;
+        text-align: center;
+        color: #888;
+      }
+      .highlight {
+        font-weight: bold;
+        color: #007bff;
+      }
+      .btn {
+        display: inline-block;
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+      }
+      .btn:hover {
+        background-color: #0056b3;
+      }
+      .btn-text {
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">Xác nhận tài khoản</div>
+      <div class="content">
+        <p>Chào <span class="highlight">{FullName}</span>,</p>
+        <p>
+          Bạn đã đăng ký tài khoản thành công. Vui lòng nhấn vào nút bên dưới để
+          kích hoạt tài khoản:
+        </p>
+
+        <a
+          href="http://blogdev.quinguyen.click/register?token={TOKEN}"
+          class="btn"
+          ><span class="btn-text">Xác nhận tài khoản</span></a
+        >
+
+        <p>Nếu bạn không thực hiện đăng ký, vui lòng bỏ qua email này.</p>
+        <p>Trân trọng,</p>
+        <p>Đội ngũ hỗ trợ: contact.negublog@gmail.com</p>
+      </div>
+      <div class="footer">© 2024 NEGU Blog. All rights reserved.</div>
+    </div>
+  </body>
+</html>

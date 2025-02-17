@@ -6,12 +6,13 @@ using blog.Data;
 using blog.DTO.User;
 using blog.Model;
 using blog.Repository;
+using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace blog.Services
 {
-    public class UserService(ApplicationDbContext contex, IConfiguration configuration, IMapper mapper) : IUser
+    public class UserService(ApplicationDbContext contex, IConfiguration configuration, IMapper mapper, IEmailService emailService) : IUser
     {
         public async Task<List<UserDto>> GetAll(int pageSize = 20, int pageIndex = 1, string? searchText = null)
         {
@@ -33,7 +34,8 @@ namespace blog.Services
                 throw new KeyNotFoundException("Don't find user table");
             }
 
-            var result = await users.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(e => new UserDto{
+            var result = await users.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(e => new UserDto
+            {
                 UserId = e.UserId,
                 Role = e.Role,
                 FullName = e.FullName,
@@ -69,19 +71,25 @@ namespace blog.Services
         public async Task<User> Create(CreateUser _user)
         {
             var user = mapper.Map<User>(_user);
-            // var user = new User();
 
-            // user.FullName = _user.FullName;
-            // user.Email = _user.Email;
+            string password = Guid.NewGuid().ToString("N").Substring(0, 8);
 
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(_user.Password);
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+
+            string account = _user.Email.Split("@")[0];
 
             user.Password = hashedPassword;
-            // user.UserName = _user.UserName;
-            // user.Role = RoleType.USER;
+            user.UserName = account;
 
             await contex.User.AddAsync(user);
             await contex.SaveChangesAsync();
+
+            string bodyMail = await File.ReadAllTextAsync("./Helper/EmailAccount.html");
+            bodyMail = bodyMail.Replace("{FullName}", _user.FullName)
+                                 .Replace("{Username}", account)
+                                 .Replace("{Password}", password);
+
+            await emailService.SendMail(_user.Email, "Thông tin tài khoản", bodyMail);
 
             return user;
         }
@@ -108,8 +116,9 @@ namespace blog.Services
                 throw new KeyNotFoundException("User don't exsit");
             }
 
-            user.IsDelete = false;
-            contex.Update(user);
+            // user.IsDelete = true;
+            // contex.Update(user);
+            contex.Remove(user);
             await contex.SaveChangesAsync();
 
             return true;
@@ -128,7 +137,7 @@ namespace blog.Services
 
             contex.User.Update(user);
             await contex.SaveChangesAsync();
-            
+
             return user;
         }
 
@@ -180,6 +189,52 @@ namespace blog.Services
         public async Task<bool> isAccountExist(string acount)
         {
             return await contex.User.AnyAsync(e => e.UserName == acount);
+        }
+
+        public async Task<string> VerifyEmail(string email)
+        {
+
+            var claim = new List<Claim>{
+                new (JwtRegisteredClaimNames.Sub, email),
+                new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new ("Id", "00000000-0000-0000-0000-000000000000"),
+                new ("Email", email)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:SecretKey"] ?? string.Empty));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: configuration["JwtSettings:Issuer"],
+                audience: configuration["JwtSettings:Audience"],
+                claims: claim,
+                expires: DateTime.Now.AddMinutes(10),
+                signingCredentials: creds
+            );
+
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+            string emailTemplate = File.ReadAllText("./Helper/EmailTemplate.html");
+
+            emailTemplate = emailTemplate.Replace("{FullName}", email)
+                                         .Replace("{TOKEN}", tokenString);
+
+
+            await emailService.SendMail(email, "Đăng ký tài khoản NEGU Blog", emailTemplate);
+
+            return tokenString;
+        }
+
+        public async Task<Guid> ChangePassword(User user, string password)
+        {
+            string newPassword = BCrypt.Net.BCrypt.HashPassword(password);
+
+            user.Password = newPassword;
+
+            contex.User.Update(user);
+            await contex.SaveChangesAsync();
+
+            return user.UserId;
         }
     }
 }
