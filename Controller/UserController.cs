@@ -244,7 +244,7 @@ namespace blog.Controller
                 {
                     return Ok(new ResponseBase<string>
                     {
-                        Data = token,
+                        Data = "",
                         Message = "Đã có lỗi xãy ra.",
                         Status = 400,
                         Success = true
@@ -253,7 +253,7 @@ namespace blog.Controller
 
                 return Ok(new ResponseBase<string>
                 {
-                    Data = token,
+                    Data = "",
                     Message = "",
                     Status = 200,
                     Success = true
@@ -267,6 +267,7 @@ namespace blog.Controller
         }
 
         [HttpPut("change-password")]
+        [Authorize]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePassword resquet)
         {
             try
@@ -280,6 +281,21 @@ namespace blog.Controller
                         Data = null,
                         Message = "Người dùng không tồn tại",
                         Status = 204,
+                        Success = false
+                    });
+                }
+
+                var currentUserId = User.FindFirst("Id")?.Value;
+                Guid currentUserIdGuid = new Guid(currentUserId ?? "");
+                var isAdmin = await iUser.GetUserById(currentUserIdGuid);
+
+                if (currentUserIdGuid != resquet.userId || isAdmin?.Role != 0)
+                {
+                    return Ok(new ResponseBase<string>
+                    {
+                        Data = null,
+                        Message = "Bạn không có quyền đổi mật khẩu tài khoản này !",
+                        Status = 401,
                         Success = false
                     });
                 }
