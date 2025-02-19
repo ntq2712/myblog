@@ -353,7 +353,7 @@ namespace blog.Controller
                     return Ok(new ResponseBase<string>
                     {
                         Data = "",
-                        Message = "Bạn không có quyền.",
+                        Message = "Bạn không có quyền truy cập tài nguyên này.",
                         Status = 401,
                         Success = false
                     });
