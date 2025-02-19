@@ -1,9 +1,11 @@
+using BCrypt.Net;
 using blog.DTO.User;
 using blog.Helper;
 using blog.Model;
 using blog.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Cryptography;
 
 namespace blog.Controller
 {
@@ -221,10 +223,35 @@ namespace blog.Controller
         }
 
         [HttpPost("verify-email")]
-        public async Task<IActionResult> VerifyEmail([FromQuery] string email)
+        public async Task<IActionResult> VerifyEmail([FromQuery] string email, string apiKey)
         {
             try
             {
+
+                if (!ApiKeyProvider.IsValidBase64(apiKey))
+                {
+                    return Ok(new ResponseBase<string>
+                    {
+                        Data = "",
+                        Message = "Bạn không có quyền.",
+                        Status = 401,
+                        Success = false
+                    });
+                }
+                string decryptedKey = ApiKeyProvider.Decrypt(apiKey);
+                string secretKey = ApiKeyProvider.GetSecretKey();
+
+                if (decryptedKey != secretKey)
+                {
+                    return Ok(new ResponseBase<string>
+                    {
+                        Data = "",
+                        Message = "Bạn không có quyền.",
+                        Status = 401,
+                        Success = false
+                    });
+                }
+
                 if (email == null)
                 {
                     var res = new ResponseBase<string>
@@ -309,6 +336,65 @@ namespace blog.Controller
                     Status = 200,
                     Success = false
                 });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromQuery] string email, string apiKey)
+        {
+            try
+            {
+                if (!ApiKeyProvider.IsValidBase64(apiKey))
+                {
+                    return Ok(new ResponseBase<string>
+                    {
+                        Data = "",
+                        Message = "Bạn không có quyền.",
+                        Status = 401,
+                        Success = false
+                    });
+                }
+                string decryptedKey = ApiKeyProvider.Decrypt(apiKey);
+                string secretKey = ApiKeyProvider.GetSecretKey();
+
+                if (decryptedKey != secretKey)
+                {
+                    return Ok(new ResponseBase<string>
+                    {
+                        Data = "",
+                        Message = "Bạn không có quyền.",
+                        Status = 401,
+                        Success = false
+                    });
+                }
+
+                bool isSuccess = await iUser.ForgotPassword(email);
+
+                if (isSuccess)
+                {
+                    return Ok(new ResponseBase<string>
+                    {
+                        Data = "",
+                        Message = "Đặt lại mật khẩu thành công, vui lòng kiểm tra gmail.",
+                        Status = 204,
+                        Success = true
+                    });
+                }
+                else
+                {
+                    return Ok(new ResponseBase<string>
+                    {
+                        Data = "",
+                        Message = "Tài khoản chưa được đăng ký.",
+                        Status = 400,
+                        Success = false
+                    });
+
+                }
             }
             catch (KeyNotFoundException ex)
             {

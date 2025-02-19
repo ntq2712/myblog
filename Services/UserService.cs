@@ -106,6 +106,12 @@ namespace blog.Services
 
             return user;
         }
+        public async Task<User?> GetUserByEmail(string email)
+        {
+            var user = await contex.User.FirstOrDefaultAsync(e => e.Email == email);
+
+            return user;
+        }
 
         public async Task<bool> Delete(Guid _id)
         {
@@ -235,6 +241,32 @@ namespace blog.Services
             await contex.SaveChangesAsync();
 
             return user.UserId;
+        }
+
+        public async Task<bool> ForgotPassword(string email)
+        {
+            string password = Guid.NewGuid().ToString("N").Substring(0, 8);
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+
+            var user = await GetUserByEmail(email);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            user.Password = hashedPassword;
+
+            contex.User.Update(user);
+            await contex.SaveChangesAsync();
+
+            string emailTemplate = File.ReadAllText("./Helper/ForgotPassword.html");
+
+            emailTemplate = emailTemplate.Replace("{Password}", password).Replace("{FullName}", user.FullName);
+
+            await emailService.SendMail(email, "Đặt lại mật khẩu", emailTemplate);
+
+            return true;
         }
     }
 }
