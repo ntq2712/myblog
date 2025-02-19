@@ -18,6 +18,6 @@ namespace blog.Repository
         public Task<bool> isAccountExist(string acount);
         public Task<string> VerifyEmail(string email);
         public Task<Guid> ChangePassword(User user, string password);
-        public Task<bool> ForgotPassword(string email);
+        public Task<bool> ResetPassword(string email);
     }
 }

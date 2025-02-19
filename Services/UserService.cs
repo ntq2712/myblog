@@ -243,7 +243,7 @@ namespace blog.Services
             return user.UserId;
         }
 
-        public async Task<bool> ForgotPassword(string email)
+        public async Task<bool> ResetPassword(string email)
         {
             string password = Guid.NewGuid().ToString("N").Substring(0, 8);
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);

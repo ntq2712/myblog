@@ -372,7 +372,7 @@ namespace blog.Controller
                     });
                 }
 
-                bool isSuccess = await iUser.ForgotPassword(email);
+                bool isSuccess = await iUser.ResetPassword(email);
 
                 if (isSuccess)
                 {
