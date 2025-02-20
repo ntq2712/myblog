@@ -78,7 +78,12 @@ var app = builder.Build();
 
 
 app.UseSwagger();
-app.UseSwaggerUI();
+
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+    c.RoutePrefix = string.Empty;
+});
 
 var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
 if (!Directory.Exists(uploadFolder))
