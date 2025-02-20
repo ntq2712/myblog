@@ -14,6 +14,7 @@ namespace blog.Extenstion
         {
             services.AddScoped<IUser, UserService>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<ITag, TagService>();
         }
 
         public static void AddMap(this IServiceCollection services)
