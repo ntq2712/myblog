@@ -63,6 +63,13 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowAll", builder => {
+        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+    });
+});
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication();
@@ -85,7 +92,7 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/uploads"
 });
 
-
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 // app.UseHttpsRedirection();
