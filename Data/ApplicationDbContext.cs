@@ -4,9 +4,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace blog.Data
 {
-    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IHttpContextAccessor _httpContextAccessor) : DbContext(options)
+    public class ApplicationDbContext : DbContext
     {
-        private readonly IHttpContextAccessor httpContextAccessor = _httpContextAccessor;
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        {
+
+        }
 
         public DbSet<Post> Post { set; get; }
         public DbSet<PostSection> PostSection { set; get; }
@@ -14,9 +17,5 @@ namespace blog.Data
         public DbSet<Tag> Tag { set; get; }
         public DbSet<Like> Like { set; get; }
 
-        public void UpdateAuditFields()
-        {
-            var useId = httpContextAccessor.HttpContext.User.FindFirstValue("Id");
-        }
     }
 }

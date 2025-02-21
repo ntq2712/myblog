@@ -36,7 +36,6 @@ builder.Services.AddMap();
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -70,20 +69,13 @@ builder.Services.AddCors(options => {
     });
 });
 
-builder.Services.AddHttpContextAccessor();
-
 builder.Services.AddAuthentication();
 
 var app = builder.Build();
 
 
 app.UseSwagger();
-
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-    c.RoutePrefix = string.Empty;
-});
+app.UseSwaggerUI();
 
 var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
 if (!Directory.Exists(uploadFolder))
