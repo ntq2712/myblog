@@ -65,7 +65,7 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddCors(options => {
     options.AddPolicy("AllowAll", builder => {
-        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+        builder.AllowAnyOrigin().AllowAnyMethod();
     });
 });
 
@@ -92,7 +92,7 @@ app.UseStaticFiles(new StaticFileOptions
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
-// app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 app.MapControllers();
 
 app.Run();
