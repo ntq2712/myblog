@@ -15,6 +15,7 @@ namespace blog.Controller
     {
 
         [HttpGet("getAll")]
+        [Authorize]
         public async Task<IActionResult> GetAllTags()
         {
             try
