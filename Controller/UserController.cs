@@ -5,13 +5,12 @@ using blog.Model;
 using blog.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Cryptography;
 
 namespace blog.Controller
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController(IUser iUser) : ControllerBase
+    public class UserController(IUser _iUser, IRSA _rsaService) : ControllerBase
     {
         [HttpGet]
         [Route("[action]")]
@@ -23,16 +22,16 @@ namespace blog.Controller
                 var userId = User.FindFirst("Id")?.Value;
                 Guid userGuidId = new Guid(userId ?? "");
 
-                var user = await iUser.GetUserById(userGuidId);
+                var user = await _iUser.GetUserById(userGuidId);
 
                 if (user == null || user.Role != 0)
                 {
                     return Unauthorized(new { message = "No access" });
                 }
 
-                var users = await iUser.GetAll(_pageSize, _pageIndex, _searchText);
+                var users = await _iUser.GetAll(_pageSize, _pageIndex, _searchText);
 
-                var count = await iUser.Count();
+                var count = await _iUser.Count();
 
                 var repon = new Response<List<UserDto>>
                 {
@@ -62,7 +61,7 @@ namespace blog.Controller
             {
                 var repon = new ResponseBase<User>();
 
-                var isEmailExist = await iUser.isEmailExist(_user.Email);
+                var isEmailExist = await _iUser.isEmailExist(_user.Email);
                 if (isEmailExist)
                 {
                     repon.Message = "Email exist !";
@@ -71,7 +70,7 @@ namespace blog.Controller
                     return Ok(repon);
                 }
 
-                var user = await iUser.Create(_user);
+                var user = await _iUser.Create(_user);
 
                 repon.Success = true;
                 repon.Status = 200;
@@ -92,7 +91,7 @@ namespace blog.Controller
         {
             try
             {
-                var isSuccess = await iUser.Delete(_id);
+                var isSuccess = await _iUser.Delete(_id);
 
                 var repon = new ResponseBase<bool>
                 {
@@ -117,7 +116,7 @@ namespace blog.Controller
         {
             try
             {
-                var user = await iUser.Edit(_user);
+                var user = await _iUser.Edit(_user);
 
                 var repon = new ResponseBase<User>
                 {
@@ -140,7 +139,7 @@ namespace blog.Controller
         {
             try
             {
-                var user = await iUser.GetUserById(_id);
+                var user = await _iUser.GetUserById(_id);
 
                 var repon = new ResponseBase<User>
                 {
@@ -164,7 +163,7 @@ namespace blog.Controller
         {
             try
             {
-                var user = await iUser.GetUserByUserName(userName);
+                var user = await _iUser.GetUserByUserName(userName);
 
                 var repon = new ResponseBase<User>
                 {
@@ -187,7 +186,34 @@ namespace blog.Controller
         {
             try
             {
-                var token = await iUser.Login(user.userName, user.password);
+                if (string.IsNullOrWhiteSpace(user.password) || string.IsNullOrWhiteSpace(user.userName))
+                {
+                    var repon = new ResponseBase<string>
+                    {
+                        Data = "",
+                        Status = 204,
+                        Message = "Login Fail",
+                        Success = true
+                    };
+                    return repon;
+                }
+
+                if (!ApiKeyProvider.IsValidBase64(user.password))
+                {
+                    return Ok(new ResponseBase<string>
+                    {
+                        Data = "",
+                        Message = "Mật khẩu không hợp lệ.",
+                        Status = 400,
+                        Success = false
+                    });
+                }
+
+                string decryptedPasswor = _rsaService.Decrypt(user.password);
+
+                // Console.WriteLine($"Sau----------------->: {decryptedPasswor}");
+
+                var token = await _iUser.Login(user.userName, decryptedPasswor);
 
                 if (token == null)
                 {
@@ -265,7 +291,7 @@ namespace blog.Controller
                     return Ok(res);
                 }
 
-                string token = await iUser.VerifyEmail(email);
+                string token = await _iUser.VerifyEmail(email);
 
                 if (token == null)
                 {
@@ -299,7 +325,7 @@ namespace blog.Controller
         {
             try
             {
-                var user = await iUser.GetUserById(resquet.userId);
+                var user = await _iUser.GetUserById(resquet.userId);
 
                 if (user == null)
                 {
@@ -314,7 +340,7 @@ namespace blog.Controller
 
                 var currentUserId = User.FindFirst("Id")?.Value;
                 Guid currentUserIdGuid = new Guid(currentUserId ?? "");
-                var isAdmin = await iUser.GetUserById(currentUserIdGuid);
+                var isAdmin = await _iUser.GetUserById(currentUserIdGuid);
 
                 if (currentUserIdGuid != resquet.userId || isAdmin?.Role != 0)
                 {
@@ -327,7 +353,7 @@ namespace blog.Controller
                     });
                 }
 
-                Guid id = await iUser.ChangePassword(user, resquet.password);
+                Guid id = await _iUser.ChangePassword(user, resquet.password);
 
                 return Ok(new ResponseBase<Guid>
                 {
@@ -372,7 +398,7 @@ namespace blog.Controller
                     });
                 }
 
-                bool isSuccess = await iUser.ResetPassword(email);
+                bool isSuccess = await _iUser.ResetPassword(email);
 
                 if (isSuccess)
                 {
@@ -400,6 +426,13 @@ namespace blog.Controller
             {
                 return NotFound(new { message = ex.Message });
             }
+        }
+
+        [HttpGet("public-key")]
+        public ActionResult<string> GetPublicKey()
+        {
+
+            return Ok(_rsaService.GetPublicKey());
         }
     }
 }
