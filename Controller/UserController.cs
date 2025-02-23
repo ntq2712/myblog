@@ -193,7 +193,7 @@ namespace blog.Controller
                         Data = "",
                         Status = 204,
                         Message = "Login Fail",
-                        Success = true
+                        Success = false
                     };
                     return repon;
                 }
@@ -209,11 +209,23 @@ namespace blog.Controller
                     });
                 }
 
+                var _user = await _iUser.GetUserByUserName(user.userName);
+
+                if (_user == null)
+                {
+                    var repon = new ResponseBase<string>
+                    {
+                        Data = "",
+                        Status = 404,
+                        Message = "Người dùng không tồn tại.",
+                        Success = false
+                    };
+                    return repon;
+                }
+
                 string decryptedPasswor = _rsaService.Decrypt(user.password);
 
-                // Console.WriteLine($"Sau----------------->: {decryptedPasswor}");
-
-                var token = await _iUser.Login(user.userName, decryptedPasswor);
+                var token = await _iUser.Login(_user, decryptedPasswor);
 
                 if (token == null)
                 {
@@ -222,8 +234,8 @@ namespace blog.Controller
                     {
                         Data = "",
                         Status = 204,
-                        Message = "Login Fail",
-                        Success = true
+                        Message = "Sai mật khẩu.",
+                        Success = false
                     };
                     return repon;
                 }
@@ -234,7 +246,7 @@ namespace blog.Controller
                     {
                         Data = token,
                         Status = 200,
-                        Message = "Success",
+                        Message = "Thành công.",
                         Success = true
                     };
 
@@ -300,15 +312,15 @@ namespace blog.Controller
                         Data = "",
                         Message = "Đã có lỗi xãy ra.",
                         Status = 400,
-                        Success = true
+                        Success = false
                     });
                 }
 
                 return Ok(new ResponseBase<string>
                 {
                     Data = "",
-                    Message = "",
-                    Status = 200,
+                    Message = "Vui lòng kiểm tra gmail của bạn.",
+                    Status = 204,
                     Success = true
                 });
             }

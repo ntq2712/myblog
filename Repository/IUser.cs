@@ -13,7 +13,7 @@ namespace blog.Repository
         public Task<User?> GetUserByUserName(string userName);
         public Task<bool> Delete(Guid _id);
         public Task<User?> Edit(User _user);
-        public Task<string> Login(string acount, string password);
+        public Task<string?> Login(User _user, string password);
         public Task<bool> isEmailExist(string email);
         public Task<bool> isAccountExist(string acount);
         public Task<string> VerifyEmail(string email);

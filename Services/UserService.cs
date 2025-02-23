@@ -147,29 +147,12 @@ namespace blog.Services
             return user;
         }
 
-        public async Task<string> Login(string _userName, string _password)
+        public async Task<string?> Login(User user, string _password)
         {
-            var user = await contex.User.Where(u => u.IsDelete == false).FirstOrDefaultAsync(e => e.UserName == _userName);
-
-            if (user == null)
-            {
-                throw new KeyNotFoundException("Don't find user by UseName");
-            }
-
-            if (_password == null)
-            {
-                throw new KeyNotFoundException("Password don't macth");
-            }
-
-            if (string.IsNullOrEmpty(user.Password))
-            {
-                throw new KeyNotFoundException("Password don't macth");
-            }
-
 
             if (!BCrypt.Net.BCrypt.Verify(_password, user.Password))
             {
-                throw new KeyNotFoundException("Password don't macth");
+                return null;
             }
 
             var token = GenToken(user);
