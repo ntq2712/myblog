@@ -175,7 +175,7 @@ namespace blog.Services
                 issuer: configuration["JwtSettings:Issuer"],
                 audience: configuration["JwtSettings:Audience"],
                 claims: claim,
-                expires: DateTime.Now.AddHours(3),
+                expires: DateTime.Now.AddDays(7),
                 signingCredentials: creds
             );
 
@@ -198,7 +198,8 @@ namespace blog.Services
                 new (JwtRegisteredClaimNames.Sub, email),
                 new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new ("Id", "00000000-0000-0000-0000-000000000000"),
-                new ("Email", email)
+                new ("Email", email),
+                new ("Permission", "Register")
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:SecretKey"] ?? string.Empty));
@@ -239,9 +240,6 @@ namespace blog.Services
 
         public async Task<bool> ResetPassword(string email)
         {
-            string password = Guid.NewGuid().ToString("N").Substring(0, 8);
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
-
             var user = await GetUserByEmail(email);
 
             if (user == null)
@@ -249,14 +247,27 @@ namespace blog.Services
                 return false;
             }
 
-            user.Password = hashedPassword;
+            var claim = new List<Claim>{
+                new (JwtRegisteredClaimNames.Sub, email),
+                new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new ("Id", user.UserId.ToString()),
+            };
 
-            contex.User.Update(user);
-            await contex.SaveChangesAsync();
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:SecretKey"] ?? string.Empty));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+            var token = new JwtSecurityToken(
+                issuer: configuration["JwtSettings:Issuer"],
+                audience: configuration["JwtSettings:Audience"],
+                claims: claim,
+                expires: DateTime.Now.AddMinutes(10),
+                signingCredentials: creds
+            );
+
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
             string emailTemplate = File.ReadAllText("./Helper/ForgotPassword.html");
 
-            emailTemplate = emailTemplate.Replace("{Password}", password).Replace("{FullName}", user.FullName);
+            emailTemplate = emailTemplate.Replace("{TOKEN}", tokenString).Replace("{FullName}", user.FullName);
 
             await emailService.SendMail(email, "Đặt lại mật khẩu", emailTemplate);
 

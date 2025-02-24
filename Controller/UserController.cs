@@ -1,5 +1,6 @@
-using BCrypt.Net;
+using System.Security.Claims;
 using blog.DTO.User;
+using blog.Filter;
 using blog.Helper;
 using blog.Model;
 using blog.Repository;
@@ -14,21 +15,12 @@ namespace blog.Controller
     {
         [HttpGet]
         [Route("[action]")]
-        [Authorize]
+        [AuthorizeRole(RoleType.USER)]
+        // [Authorize]
         public async Task<ActionResult<Response<List<UserDto>>>> GetAllUser([FromQuery] int _pageSize = 20, int _pageIndex = 1, string? _searchText = null)
         {
             try
             {
-                var userId = User.FindFirst("Id")?.Value;
-                Guid userGuidId = new Guid(userId ?? "");
-
-                var user = await _iUser.GetUserById(userGuidId);
-
-                if (user == null || user.Role != 0)
-                {
-                    return Unauthorized(new { message = "No access" });
-                }
-
                 var users = await _iUser.GetAll(_pageSize, _pageIndex, _searchText);
 
                 var count = await _iUser.Count();
@@ -59,6 +51,19 @@ namespace blog.Controller
         {
             try
             {
+                var permission = User.FindFirstValue("Permission");
+
+                if (permission == null || permission != "Register")
+                {
+                    return Ok(new Response<string>
+                    {
+                        Data = "",
+                        Success = false,
+                        Message = "Bạn không có quyền truy cập tài nguyên này.",
+                        Status = 401
+                    });
+                }
+
                 var repon = new ResponseBase<User>();
 
                 var isEmailExist = await _iUser.isEmailExist(_user.Email);
@@ -331,7 +336,7 @@ namespace blog.Controller
 
         }
 
-        [HttpPut("change-password")]
+        [HttpPut("Change-Password")]
         [Authorize]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePassword resquet)
         {
@@ -349,7 +354,7 @@ namespace blog.Controller
                         Success = false
                     });
                 }
-
+                
                 var currentUserId = User.FindFirst("Id")?.Value;
                 Guid currentUserIdGuid = new Guid(currentUserId ?? "");
                 var isAdmin = await _iUser.GetUserById(currentUserIdGuid);
@@ -381,7 +386,7 @@ namespace blog.Controller
             }
         }
 
-        [HttpPost("reset-password")]
+        [HttpPost("Forgot-Password")]
         public async Task<IActionResult> ResetPassword([FromQuery] string email, string apiKey)
         {
             try
@@ -417,7 +422,7 @@ namespace blog.Controller
                     return Ok(new ResponseBase<string>
                     {
                         Data = "",
-                        Message = "Đặt lại mật khẩu thành công, vui lòng kiểm tra gmail.",
+                        Message = "Vui lòng kiểm tra gmail.",
                         Status = 204,
                         Success = true
                     });
