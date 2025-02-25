@@ -12,7 +12,7 @@ namespace blog.Services
     {
         public async Task<List<PostSection>> GetAll(PageResponse filter)
         {
-            var postSections = await dbContext.PostSection.Where(e => e.IsDelete == true).Skip((filter.PageIndex - 1) * filter.PageSize).Take(filter.PageIndex * filter.PageSize).Where(s => string.IsNullOrEmpty(filter.SearchText) || s.Heading.Contains(filter.SearchText)).ToListAsync();
+            var postSections = await dbContext.PostSection.Where(e => e.IsDelete == true).ToListAsync();
 
             if (postSections == null)
             {
