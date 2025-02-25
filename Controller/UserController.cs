@@ -473,5 +473,59 @@ namespace blog.Controller
 
             return Ok(_rsaService.GetPublicKey());
         }
+
+        [HttpGet("Get-My-Profile")]
+        public async Task<IActionResult> GetMyProfile()
+        {
+            try
+            {
+                var userId = User.FindFirstValue("Id");
+
+                if (!Guid.TryParse(userId, out var userGuidId))
+                {
+                    return Ok(new ResponseBase<string>
+                    {
+                        Data = "",
+                        Message = "Bạn không có quyền.",
+                        Status = 401,
+                        Success = false
+                    });
+                }
+
+                var user = await _iUser.GetUserById(userGuidId);
+
+                if (user == null)
+                {
+                    return Ok(new ResponseBase<string>
+                    {
+                        Data = "",
+                        Message = "Không tìm thấy thông tin của bạn.",
+                        Status = 204,
+                        Success = true
+                    });
+                }
+                else
+                {
+
+                    return Ok(new ResponseBase<User>
+                    {
+                        Data = user,
+                        Message = "Thành công",
+                        Status = 200,
+                        Success = true
+                    });
+                }
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Ok(new ResponseBase<string>
+                {
+                    Data = "",
+                    Message = ex.Message,
+                    Status = 500,
+                    Success = false
+                });
+            }
+        }
     }
 }
