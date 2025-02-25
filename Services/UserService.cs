@@ -84,7 +84,7 @@ namespace blog.Services
             await contex.User.AddAsync(user);
             await contex.SaveChangesAsync();
 
-            string bodyMail = await File.ReadAllTextAsync("./Helper/EmailAccount.html");
+            string bodyMail = await File.ReadAllTextAsync("./Public/EmailAccount.html");
             bodyMail = bodyMail.Replace("{FullName}", _user.FullName)
                                  .Replace("{Username}", account)
                                  .Replace("{Password}", password);
@@ -216,7 +216,7 @@ namespace blog.Services
 
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-            string emailTemplate = File.ReadAllText("./Helper/EmailTemplate.html");
+            string emailTemplate = File.ReadAllText("./Public/EmailTemplate.html");
 
             emailTemplate = emailTemplate.Replace("{FullName}", email)
                                          .Replace("{TOKEN}", tokenString);
@@ -266,7 +266,7 @@ namespace blog.Services
             );
 
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-            string emailTemplate = File.ReadAllText("./Helper/ForgotPassword.html");
+            string emailTemplate = File.ReadAllText("./Public/ForgotPassword.html");
 
             emailTemplate = emailTemplate.Replace("{TOKEN}", tokenString).Replace("{FullName}", user.FullName);
 

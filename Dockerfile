@@ -5,6 +5,7 @@ EXPOSE 5000
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 COPY ["blog.csproj", "./"]
+COPY Public ./Public
 RUN dotnet restore "blog.csproj"
 COPY . .
 RUN dotnet publish -c Release -o /app/publish
