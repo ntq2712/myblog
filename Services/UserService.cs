@@ -141,6 +141,9 @@ namespace blog.Services
 
             user.FullName = _user.FullName;
             user.ProfilePic = _user.ProfilePic;
+            user.Address = _user.Address;
+            user.BirthDay = _user.BirthDay;
+            user.Sex = _user.Sex;
 
             contex.User.Update(user);
             await contex.SaveChangesAsync();
