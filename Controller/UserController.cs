@@ -474,7 +474,8 @@ namespace blog.Controller
             return Ok(_rsaService.GetPublicKey());
         }
 
-        [HttpGet("Get-My-Profile")]
+        [HttpGet("GetMyProfile")]
+        [Authorize]
         public async Task<IActionResult> GetMyProfile()
         {
             try
