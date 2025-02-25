@@ -15,7 +15,7 @@ namespace blog.Controller
     {
         [HttpGet]
         [Route("[action]")]
-        [AuthorizeRole(RoleType.USER)]
+        [AuthorizeRole(RoleType.ADMIN)]
         // [Authorize]
         public async Task<ActionResult<Response<List<UserDto>>>> GetAllUser([FromQuery] int _pageSize = 20, int _pageIndex = 1, string? _searchText = null)
         {
@@ -117,10 +117,25 @@ namespace blog.Controller
 
         [HttpPut]
         [Route("[action]")]
-        public async Task<ActionResult<ResponseBase<User>>> UpdateUser([FromBody] User _user)
+        public async Task<ActionResult<ResponseBase<User>>> UpdateProfile([FromBody] User _user)
         {
             try
             {
+                var currentUserId = User.FindFirst("Id")?.Value;
+                Guid currentUserIdGuid = new Guid(currentUserId ?? "");
+                var isAdmin = await _iUser.GetUserById(currentUserIdGuid);
+
+                if (currentUserIdGuid != _user.UserId || isAdmin?.Role != 0)
+                {
+                    return Ok(new ResponseBase<string>
+                    {
+                        Data = null,
+                        Message = "Bạn không có quyền đổi mật khẩu tài khoản này !",
+                        Status = 401,
+                        Success = false
+                    });
+                }
+
                 var user = await _iUser.Edit(_user);
 
                 var repon = new ResponseBase<User>
@@ -140,6 +155,7 @@ namespace blog.Controller
 
         [HttpGet]
         [Route("[action]")]
+        [Authorize]
         public async Task<ActionResult<ResponseBase<User>>> GetUserById([FromQuery] Guid _id)
         {
             try
@@ -331,7 +347,13 @@ namespace blog.Controller
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(new { message = ex.Message });
+                return Ok(new ResponseBase<string>
+                {
+                    Data = "",
+                    Message = ex.Message,
+                    Status = 400,
+                    Success = false
+                });
             }
 
         }
@@ -354,7 +376,7 @@ namespace blog.Controller
                         Success = false
                     });
                 }
-                
+
                 var currentUserId = User.FindFirst("Id")?.Value;
                 Guid currentUserIdGuid = new Guid(currentUserId ?? "");
                 var isAdmin = await _iUser.GetUserById(currentUserIdGuid);

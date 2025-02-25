@@ -136,10 +136,11 @@ namespace blog.Services
 
             if (user == null)
             {
-                throw new KeyNotFoundException("User don't exsit");
+               return null;
             }
 
             user.FullName = _user.FullName;
+            user.ProfilePic = _user.ProfilePic;
 
             contex.User.Update(user);
             await contex.SaveChangesAsync();
