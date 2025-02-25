@@ -2,8 +2,15 @@ using System.ComponentModel.DataAnnotations;
 using blog.Helper;
 
 public enum StatusType {
-    PublicKey = 2,
-    DRAFT = 1
+    PUBLIC = 2,
+    DRAFT = 1,
+    REJECT = 3
+}
+
+public enum PostType {
+    FREE = 0,
+    PREMIUM = 1,
+    GROUP = 3
 }
 
 namespace blog.Model
@@ -15,7 +22,11 @@ namespace blog.Model
         public string Title { set; get; } = "";
         public string? Content {set;get;}
         public StatusType Status {set;get;} = StatusType.DRAFT;
-        public int ViewCount {set;get;}
+        public int TotalViews {set;get;}
+        public int TotalLikes {set;get;}
+        public int TotalComments {set;get;}
         public string? CoverImage {set;get;}
+        public Guid CategoryId {set;get;}
+        public PostType Type {set;get;}
     }
 }
