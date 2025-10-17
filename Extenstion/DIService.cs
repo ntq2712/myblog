@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using blog.Data;
-using blog.Filter;
 using blog.Repository;
 using blog.Services;
 
@@ -17,7 +12,13 @@ namespace blog.Extenstion
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<ITag, TagService>();
             services.AddScoped<IRSA, RSAService>();
-            // services.AddScoped<UserFilter>();
+            services.AddScoped<IMyProfileSevice, MyProfileSevice>();
+            services.AddScoped<ICaseStudyService, CaseStudyService>();
+            services.AddScoped<ICaseStudyTypeService, CaseStudyTypeService>();
+            services.AddScoped<IWorkExperienceRepository, WorkExperience>();
+            services.AddScoped<IGetInTouchRepository, GetInTouchService>();
+            services.AddScoped<ITestimonialRepository, TestimonialsService>();
+            services.AddScoped<IGuest, GeustService>();
         }
 
         public static void AddMap(this IServiceCollection services)

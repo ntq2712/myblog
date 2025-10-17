@@ -6,7 +6,6 @@ using blog.Data;
 using blog.DTO.User;
 using blog.Model;
 using blog.Repository;
-using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -66,6 +65,32 @@ namespace blog.Services
             var count = await contex.User.CountAsync();
 
             return count;
+        }
+
+        public async Task<User> CreateUserByAdmin(CUser _user)
+        {
+            var user = mapper.Map<User>(_user);
+
+            string password = Guid.NewGuid().ToString("N").Substring(0, 8);
+
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+
+            string account = _user.Email.Split("@")[0];
+
+            user.Password = hashedPassword;
+            user.UserName = account;
+
+            await contex.User.AddAsync(user);
+            await contex.SaveChangesAsync();
+
+            string bodyMail = await File.ReadAllTextAsync("./Public/EmailAccount.html");
+            bodyMail = bodyMail.Replace("{FullName}", _user.FullName)
+                                 .Replace("{Username}", account)
+                                 .Replace("{Password}", password);
+
+            await emailService.SendMail(_user.Email, "Thông tin tài khoản", bodyMail);
+
+            return user;
         }
 
         public async Task<User> Create(CreateUser _user)
@@ -136,7 +161,7 @@ namespace blog.Services
 
             if (user == null)
             {
-               return null;
+                return null;
             }
 
             user.FullName = _user.FullName;

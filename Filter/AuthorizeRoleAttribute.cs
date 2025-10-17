@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using blog.Helper;
 using blog.Repository;
 using Microsoft.AspNetCore.Authorization;
@@ -33,6 +29,8 @@ namespace blog.Filter
             var userService = context.HttpContext.RequestServices.GetRequiredService<IUser>();
 
             var user = await userService.GetUserById(userGuidId);
+
+            // Console.WriteLine($" user.Role: {user.Role}");
 
             // Nếu là role admin thì cho qua
             if (user == null || (user.Role != requiredRole && user.Role != RoleType.ADMIN))

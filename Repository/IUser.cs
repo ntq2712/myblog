@@ -19,5 +19,6 @@ namespace blog.Repository
         public Task<string> VerifyEmail(string email);
         public Task<Guid> ChangePassword(User user, string password);
         public Task<bool> ResetPassword(string email);
+        public Task<User> CreateUserByAdmin(CUser user);
     }
 }

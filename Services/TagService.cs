@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using blog.Data;
 using blog.Model;
 using blog.Repository;
@@ -25,13 +21,20 @@ namespace blog.Services
             return tags;
         }
 
-        public async Task<Tag> Crate(string name, Guid idUser){
+        public async Task<Tag?> Crate(string name, Guid idUser){
+            bool isExits = await dbContext.Tag.AnyAsync(t => t.TagName == name);
+
+            if(isExits){
+                return null;
+            }
             var tag = new Tag();
 
             tag.TagName = name;
             tag.IsDelete = false;
             tag.CreateAt = DateTime.Today;
             tag.CreateBy = idUser;
+            tag.ModifyAt = DateTime.Today;
+            tag.ModifyBy = idUser;
 
             await dbContext.AddAsync(tag);
             await dbContext.SaveChangesAsync();

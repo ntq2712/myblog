@@ -399,7 +399,7 @@ namespace blog.Controller
                     Data = id,
                     Message = "Cập nhật mật khẩu thành công thành công !",
                     Status = 200,
-                    Success = false
+                    Success = true
                 });
             }
             catch (KeyNotFoundException ex)
@@ -470,8 +470,14 @@ namespace blog.Controller
         [HttpGet("public-key")]
         public ActionResult<string> GetPublicKey()
         {
+            var publicKey = _rsaService.GetPublicKey();
 
-            return Ok(_rsaService.GetPublicKey());
+            return Ok(new Response<string>
+            {
+                Data = publicKey,
+                Status = 200,
+                Success = true
+            });
         }
 
         [HttpGet("GetMyProfile")]
@@ -516,6 +522,65 @@ namespace blog.Controller
                         Success = true
                     });
                 }
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Ok(new ResponseBase<string>
+                {
+                    Data = "",
+                    Message = ex.Message,
+                    Status = 500,
+                    Success = false
+                });
+            }
+        }
+
+        [HttpPost]
+        [Route("[action]")]
+        [AuthorizeRole(RoleType.ADMIN)]
+        public async Task<IActionResult> CreateUser([FromBody] CUser user)
+        {
+            try
+            {
+
+                var result = await _iUser.CreateUserByAdmin(user);
+
+                return Ok(new ResponseBase<User>
+                {
+                    Data = result,
+                    Message = "Thành công",
+                    Status = 200,
+                    Success = true
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Ok(new ResponseBase<string>
+                {
+                    Data = "",
+                    Message = ex.Message,
+                    Status = 500,
+                    Success = false
+                });
+            }
+        }
+
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<ActionResult> CreateAdmin([FromBody] CUser user)
+        {
+            try
+            {
+
+                var result = await _iUser.CreateUserByAdmin(user);
+
+                return Ok(new ResponseBase<User>
+                {
+                    Data = result,
+                    Message = "Thành công",
+                    Status = 200,
+                    Success = true
+                });
             }
             catch (KeyNotFoundException ex)
             {

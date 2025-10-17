@@ -15,7 +15,6 @@ namespace blog.Controller
     {
 
         [HttpGet("getAll")]
-        [Authorize]
         public async Task<IActionResult> GetAllTags()
         {
             try
@@ -43,9 +42,22 @@ namespace blog.Controller
                 var guidId = new Guid(userId ?? "");
                 var tag = await _tag.Crate(dto.Name, guidId);
 
+                if(tag == null){
+                    return Ok(new Response<Tag>
+                {
+                    Data = tag,
+                    Success = false,
+                    Status = 204,
+                    Message = "Tag đã tồn tại !"
+                });
+                }
+
                 return Ok(new Response<Tag>
                 {
-                    Data = tag
+                    Data = tag,
+                    Success = true,
+                    Status = 200,
+                    Message = "Thành công !"
                 });
 
             }

@@ -7,7 +7,7 @@ namespace blog.Repository
 {
     public interface IRSA
     {
-         public string Decrypt(string encryptedText);
-          public string GetPublicKey();
+        public string Decrypt(string encryptedText);
+        public string GetPublicKey();
     }
 }
