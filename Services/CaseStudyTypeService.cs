@@ -36,5 +36,28 @@ namespace blog.Services
 
             return true;
         }
+
+        public async Task<bool> DeleteById(Guid id)
+        {
+            var isExitsCaseStudiesUseType = await applicationDb.CaseStudy.AnyAsync(c => c.Type == id);
+
+            if (isExitsCaseStudiesUseType)
+            {
+                return false;
+            }
+
+            var type = await applicationDb.CaseStudyType.FirstOrDefaultAsync(t => t.Id == id);
+
+            if (type == null)
+            {
+                return false;
+            }
+
+            applicationDb.CaseStudyType.Remove(type);
+
+            await applicationDb.SaveChangesAsync();
+
+            return true;
+        }
     }
 }

@@ -19,6 +19,7 @@ namespace blog.Extenstion
             services.AddScoped<IGetInTouchRepository, GetInTouchService>();
             services.AddScoped<ITestimonialRepository, TestimonialsService>();
             services.AddScoped<IGuest, GeustService>();
+            services.AddScoped<IVisitorRepository, VisitorService>();
         }
 
         public static void AddMap(this IServiceCollection services)

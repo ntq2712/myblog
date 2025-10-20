@@ -25,5 +25,6 @@ namespace blog.Data
         public DbSet<Testimonials> Testimonials { set; get; }
         public DbSet<CaseStudyDetail> CaseStudyDetail { set; get; }
         public DbSet<Guest> Guest { set; get; }
+        public DbSet<Visitor> Visitor { set; get; }
     }
 }

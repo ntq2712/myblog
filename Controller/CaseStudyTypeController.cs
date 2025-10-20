@@ -76,6 +76,30 @@ namespace blog.Controller
         [HttpDelete]
         [Route("[action]")]
         [AuthorizeRole(RoleType.ADMIN)]
+        public async Task<IActionResult> DeleteById(Guid id)
+        {
+            try
+            {
+                var data = await service.DeleteById(id);
+
+                var repon = new Response<bool>
+                {
+                    Data = data,
+                    Message = "Success",
+                    Success = true,
+                };
+
+                return Ok(repon);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete]
+        [Route("[action]")]
+        [AuthorizeRole(RoleType.ADMIN)]
         public async Task<IActionResult> DeleteAll()
         {
             try

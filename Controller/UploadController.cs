@@ -80,7 +80,7 @@ namespace blog.Controller
 
 
         [HttpDelete("DelateImage")]
-        public async Task<IActionResult> DeleteIamge(string fileName)
+        public IActionResult DeleteIamge(string fileName)
         {
             if (string.IsNullOrWhiteSpace(fileName))
             {

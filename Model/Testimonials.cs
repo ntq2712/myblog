@@ -7,5 +7,6 @@ namespace blog.Model
         public Guid Id { set; get; }
         public string Content { set; get; } = "";
         public Guid UserId { set; get; }
+        public int Status { set; get; }
     }
 }

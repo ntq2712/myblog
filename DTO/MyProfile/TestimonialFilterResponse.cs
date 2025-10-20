@@ -1,9 +1,11 @@
-
-using blog.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace blog.DTO.MyProfile
 {
-    public class TestimonialResponse
+    public class TestimonialFilterResponse
     {
         public Guid Id { set; get; }
         public string Content { set; get; } = "";
@@ -11,5 +13,6 @@ namespace blog.DTO.MyProfile
         public string? CompanyName { set; get; }
         public string FullName { set; get; } = "";
         public string? ProfilePic { set; get; }
+        public int Status { set; get; }
     }
 }
