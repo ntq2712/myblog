@@ -1,4 +1,5 @@
 
+using blog.DTO;
 using blog.Helper;
 using Microsoft.AspNetCore.Mvc;
 
@@ -55,9 +56,12 @@ namespace blog.Controller
 
                 string fileUrl = "";
 
-                if(environment.IsDevelopment()) {
+                if (environment.IsDevelopment())
+                {
                     fileUrl = $"{Request.Scheme}://{Request.Host}/uploads/{fileName}";
-                }else{
+                }
+                else
+                {
                     fileUrl = $"{Request.Scheme}://quinguyen.click/uploads/{fileName}";
                 }
 
@@ -75,6 +79,71 @@ namespace blog.Controller
             catch (Exception ex)
             {
                 return StatusCode(500, $"Lỗi server: {ex.Message}");
+            }
+        }
+
+        [HttpPost("UploadWithName")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadWithName([FromForm] UploadFileSpecifyName request)
+        {
+            if (request.File == null || request.File.Length == 0)
+                return BadRequest(new { message = "Invalid request.File." });
+
+            if (request.File.Length > (5 * 1024 * 1024)) // 5 MB
+                return BadRequest(new { message = "Maximum size is 5 MB." });
+
+            var allowedExtensions = new[] { ".png", ".jpg", ".jpeg" };
+            var fileExtension = Path.GetExtension(request.File.FileName).ToLower();
+
+            if (!allowedExtensions.Contains(fileExtension))
+                return BadRequest(new { message = "Only .png or .jpg allowed." });
+
+            try
+            {
+                // 🧹 Làm sạch tên request.File người dùng nhập
+                string safeFileName = string.IsNullOrWhiteSpace(request.FileName)
+                    ? Path.GetFileNameWithoutExtension(request.File.FileName)
+                    : Path.GetFileNameWithoutExtension(request.FileName);
+
+                // Loại bỏ ký tự đặc biệt để tránh path traversal
+                safeFileName = string.Concat(safeFileName.Split(Path.GetInvalidFileNameChars()));
+
+                // Đảm bảo không trùng request.File
+                string finalFileName = $"{safeFileName}{fileExtension}";
+                string filePath = Path.Combine(_uploadfileFolder, finalFileName);
+
+                if (!Directory.Exists(_uploadfileFolder))
+                    Directory.CreateDirectory(_uploadfileFolder);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await request.File.CopyToAsync(stream);
+                }
+
+                // Tạo URL trả về
+                string fileUrl;
+                if (environment.IsDevelopment())
+                {
+                    fileUrl = $"{Request.Scheme}://{Request.Host}/uploads/{finalFileName}";
+                }
+                else
+                {
+                    fileUrl = $"https://quinguyen.click/uploads/{finalFileName}";
+                }
+
+                var response = new ResponseBase<string>
+                {
+                    Data = fileUrl,
+                    Status = 200,
+                    Message = "Upload successful",
+                    Success = true,
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Server error: {ex.Message}" });
             }
         }
 

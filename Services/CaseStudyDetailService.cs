@@ -43,7 +43,7 @@ namespace blog.Services
             return newItem;
         }
 
-        public async Task<CaseStudyDetail> Update(CaseStudyDetail dto)
+        public async Task<CaseStudyDetail> Update(CaseStudyDetail dto, Guid userId)
         {
             var item = await dbContext.CaseStudyDetail.FirstOrDefaultAsync(c => c.Id == dto.Id);
             if (item == null)
@@ -56,7 +56,8 @@ namespace blog.Services
             item.Index = dto.Index;
             item.Thumbnail = dto.Thumbnail;
             item.Title = dto.Title;
-            item.CreateAt = DateTime.UtcNow;
+            item.ModifyAt = DateTime.UtcNow;
+            item.ModifyBy = userId;
 
             dbContext.CaseStudyDetail.Update(item);
             await dbContext.SaveChangesAsync();
@@ -66,13 +67,7 @@ namespace blog.Services
 
         public async Task<CaseStudyDetail> DeleteById(Guid id)
         {
-            var ctd = await dbContext.CaseStudyDetail.FirstOrDefaultAsync(c => c.Id == id);
-
-            if (ctd == null)
-            {
-                throw new HttpStatusCodeException(400, "Case study not exist");
-            }
-
+            var ctd = await dbContext.CaseStudyDetail.FirstOrDefaultAsync(c => c.Id == id) ?? throw new HttpStatusCodeException(400, "Case study not exist");
             dbContext.CaseStudyDetail.Remove(ctd);
             await dbContext.SaveChangesAsync();
 

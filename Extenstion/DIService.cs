@@ -20,6 +20,7 @@ namespace blog.Extenstion
             services.AddScoped<ITestimonialRepository, TestimonialsService>();
             services.AddScoped<IGuest, GeustService>();
             services.AddScoped<IVisitorRepository, VisitorService>();
+            services.AddScoped<ICaseStudyDetailRepository, CaseStudyDetailService>();
         }
 
         public static void AddMap(this IServiceCollection services)

@@ -65,6 +65,7 @@ namespace blog.Services
 
             caseTudy.Title = dto.Title;
             caseTudy.Introduction = dto.Introduction;
+            caseTudy.Despription = dto.Despription;
             caseTudy.Thumbnail = dto.Thumbnail;
             caseTudy.ModifyAt = DateTime.Now;
             caseTudy.ModifyBy = userId;
@@ -85,6 +86,45 @@ namespace blog.Services
             }
 
             dbContext.CaseStudy.Remove(caseTudy);
+            await dbContext.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<CaseStudyDetailById> GetCaseStudyDetails(Guid id)
+        {
+            var caseTudy = await dbContext.CaseStudy.FirstOrDefaultAsync(c => c.Id == id);
+
+            if (caseTudy == null)
+            {
+                throw new HttpStatusCodeException(400, "Case not exist");
+            }
+
+            var type = await dbContext.CaseStudyType.FirstOrDefaultAsync(t => t.Id == caseTudy.Type);
+            var details = await dbContext.CaseStudyDetail.Where(c => c.CaseStudyId == id).ToListAsync();
+
+            return new CaseStudyDetailById
+            {
+                Id = caseTudy.Id,
+                Details = details,
+                Despription = caseTudy.Despription,
+                Title = caseTudy.Title,
+                Thumbnail = caseTudy.Thumbnail,
+                CaseStudyType = type ?? new CaseStudyType()
+            };
+        }
+
+        public async Task<bool> HideCaseStudy(Guid id, Guid userId)
+        {
+            var caseStudy = await dbContext.CaseStudy.FirstOrDefaultAsync(c => c.Id == id);
+
+            if (caseStudy == null) return false;
+
+            caseStudy.IsDelete = true;
+            caseStudy.ModifyBy = userId;
+            caseStudy.ModifyAt = DateTime.UtcNow;
+
+            dbContext.CaseStudy.Update(caseStudy);
             await dbContext.SaveChangesAsync();
 
             return true;

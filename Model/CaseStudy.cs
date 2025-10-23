@@ -6,6 +6,7 @@ namespace blog.Model
     {
         public Guid Id { set; get; }
         public string Introduction { set; get; } = "";
+        public string Despription { set; get; } = "";
         public Guid Type { set; get; }
         public string Thumbnail { set; get; } = "";
         public string Title { set; get; } = "";
