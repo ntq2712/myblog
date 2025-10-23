@@ -38,7 +38,7 @@ namespace blog.Services
 
             if (type == null)
             {
-                throw new HttpStatusCodeException(400, "Case Study not exist");
+                throw new HttpStatusCodeException(400, "Case study type not exist.");
             }
 
             var caseTudy = new CaseStudy();
@@ -46,9 +46,30 @@ namespace blog.Services
             caseTudy.Introduction = dto.Introduction;
             caseTudy.Thumbnail = dto.Thumbnail;
             caseTudy.Type = dto.Type;
-            caseTudy.ModifyAt = DateTime.Now;
+            caseTudy.CreateAt = DateTime.Now;
 
             await dbContext.CaseStudy.AddAsync(caseTudy);
+            await dbContext.SaveChangesAsync();
+
+            return caseTudy;
+        }
+
+        public async Task<CaseStudy> UpdateCaseStudy(CaseStudy dto, Guid userId)
+        {
+            var caseTudy = await dbContext.CaseStudy.FirstOrDefaultAsync(t => t.Id == dto.Id);
+
+            if (caseTudy == null)
+            {
+                throw new HttpStatusCodeException(400, "Case study not exist.");
+            }
+
+            caseTudy.Title = dto.Title;
+            caseTudy.Introduction = dto.Introduction;
+            caseTudy.Thumbnail = dto.Thumbnail;
+            caseTudy.ModifyAt = DateTime.Now;
+            caseTudy.ModifyBy = userId;
+
+            dbContext.CaseStudy.Update(caseTudy);
             await dbContext.SaveChangesAsync();
 
             return caseTudy;

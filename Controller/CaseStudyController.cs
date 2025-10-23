@@ -88,6 +88,59 @@ namespace blog.Controller
             }
         }
 
+        [HttpPost]
+        [Route("[action]")]
+        [AuthorizeRole(RoleType.ADMIN)]
+        public async Task<IActionResult> UpdateCaseStudy([FromBody] CaseStudy dto)
+        {
+            try
+            {
+                var currentUserId = User.FindFirst("Id")?.Value;
+
+                if (currentUserId == null)
+                {
+                    return Ok(new ResponseBase<string>
+                    {
+                        Data = null,
+                        Message = "Bạn không có quyền truy cap !",
+                        Status = 401,
+                        Success = false
+                    });
+                }
+
+                Guid currentUserIdGuid = new Guid(currentUserId ?? "");
+
+                var data = await service.UpdateCaseStudy(dto, currentUserIdGuid);
+
+                var repon = new Response<CaseStudy>
+                {
+                    Data = data,
+                    Message = "Success",
+                    Success = true,
+                };
+
+                return Ok(repon);
+            }
+            catch (HttpStatusCodeException ex)
+            {
+                return Ok(new Response<string>
+                {
+                    Message = ex.Message,
+                    Success = false,
+                    Status = ex.StatusCode
+                });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new Response<string>
+                {
+                    Status = 500,
+                    Message = ex.Message,
+                    Success = false
+                });
+            }
+        }
+
         [HttpDelete]
         [Route("[action]")]
         [AuthorizeRole(RoleType.ADMIN)]

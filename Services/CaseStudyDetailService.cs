@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using blog.Data;
 using blog.DTO.MyProfile;
 using blog.Extenstion;
@@ -17,7 +13,7 @@ namespace blog.Services
         {
             return await dbContext.CaseStudyDetail.ToListAsync();
         }
-        
+
         public async Task<List<CaseStudyDetail>> GetAllByCase(Guid id)
         {
             return await dbContext.CaseStudyDetail.Where(c => c.CaseStudyId == id).OrderBy(c => c.Index).ToListAsync();
@@ -46,7 +42,7 @@ namespace blog.Services
 
             return newItem;
         }
-        
+
         public async Task<CaseStudyDetail> Update(CaseStudyDetail dto)
         {
             var item = await dbContext.CaseStudyDetail.FirstOrDefaultAsync(c => c.Id == dto.Id);
@@ -66,6 +62,21 @@ namespace blog.Services
             await dbContext.SaveChangesAsync();
 
             return item;
+        }
+
+        public async Task<CaseStudyDetail> DeleteById(Guid id)
+        {
+            var ctd = await dbContext.CaseStudyDetail.FirstOrDefaultAsync(c => c.Id == id);
+
+            if (ctd == null)
+            {
+                throw new HttpStatusCodeException(400, "Case study not exist");
+            }
+
+            dbContext.CaseStudyDetail.Remove(ctd);
+            await dbContext.SaveChangesAsync();
+
+            return ctd;
         }
     }
 }

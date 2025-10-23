@@ -8,6 +8,7 @@ namespace blog.Repository
     {
         public Task<List<CaseTudyFullValue>> GetList();
         public Task<CaseStudy> CreateCaseStudy(CCaseStudy dto);
+        public Task<CaseStudy> UpdateCaseStudy(CaseStudy dto, Guid userId);
         public Task<bool> DeleteById(Guid id);
     }
 }

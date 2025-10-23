@@ -148,5 +148,39 @@ namespace blog.Controller
             }
         }
 
+        [HttpDelete]
+        [Route("[action]")]
+        [AuthorizeRole(RoleType.ADMIN)]
+        public async Task<IActionResult> DeleteTestimonialById([FromQuery] Guid id)
+        {
+            try
+            {
+                var data = await service.DeleteTestimonial(id);
+                if (!data)
+                {
+                    return Ok(new Response<bool>
+                    {
+                        Data = data,
+                        Message = "Testimonial not exist",
+                        Success = false,
+                        Status = 400
+                    });
+                }
+
+                var repon = new Response<bool>
+                {
+                    Data = data,
+                    Message = "Success",
+                    Success = true,
+                };
+
+                return Ok(repon);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
     }
 }

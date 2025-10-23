@@ -99,5 +99,20 @@ namespace blog.Services
 
             return newItem;
         }
+
+        public async Task<bool> DeleteTestimonial(Guid id)
+        {
+            var testimonial = await dbContext.Testimonials.FirstOrDefaultAsync(t => t.Id == id);
+
+            if (testimonial == null)
+            {
+                return false;
+            }
+
+            dbContext.Testimonials.Remove(testimonial);
+            await dbContext.SaveChangesAsync();
+
+            return true;
+        }
     }
 }
